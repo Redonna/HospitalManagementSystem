@@ -12,15 +12,17 @@ namespace HospitalManagementSystem.Tests.Services
     public class PatientServiceTests
     {
         private readonly IPatientRepository _repo;
+        private readonly IUserRepository _userRepo;
         private readonly IMapper _mapper;
         private readonly PatientService _service;
 
         public PatientServiceTests()
         {
             _repo = Substitute.For<IPatientRepository>();
+            _userRepo = Substitute.For<IUserRepository>();
             var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
             _mapper = config.CreateMapper();
-            _service = new PatientService(_repo, _mapper);
+            _service = new PatientService(_repo, _userRepo, _mapper);
         }
 
         private Patient MakePatient(int id = 1) => new()
