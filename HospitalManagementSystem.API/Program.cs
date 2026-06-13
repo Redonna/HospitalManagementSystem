@@ -111,16 +111,11 @@ using (var scope = app.Services.CreateScope())
         if (app.Environment.IsProduction())
         {
             db.Database.EnsureCreated();
-            if (!db.Users.Any())
-            {
-                db.Users.Add(new HospitalManagementSystem.API.Models.User
-                {
-                    Username = "admin",
-                    PasswordHash = "$2a$11$V1JGVUqqi3SZOmGHbCPfteLFA0GY5cm6yfpnqq1.NRNrsM7kF8kN6",
-                    Role = "Admin"
-                });
-                db.SaveChanges();
-            }
+            db.Database.ExecuteSqlRaw(@"
+                INSERT INTO ""Users"" (""Username"", ""PasswordHash"", ""Role"", ""Email"", ""CreatedAt"", ""IsActive"")
+                SELECT 'admin', '$2a$11$V1JGVUqqi3SZOmGHbCPfteLFA0GY5cm6yfpnqq1.NRNrsM7kF8kN6', 'Admin', '', NOW(), true
+                WHERE NOT EXISTS (SELECT 1 FROM ""Users"" WHERE ""Username"" = 'admin');
+            ");
         }
         else
             db.Database.Migrate();
