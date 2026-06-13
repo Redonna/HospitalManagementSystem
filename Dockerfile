@@ -5,11 +5,8 @@ ENV ASPNETCORE_URLS=http://+:8080
 
 FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0 AS build
 WORKDIR /src
-COPY ["HospitalManagementSystem.API/HospitalManagementSystem.API.csproj", "HospitalManagementSystem.API/"]
-RUN dotnet restore "HospitalManagementSystem.API/HospitalManagementSystem.API.csproj"
 COPY . .
-WORKDIR "/src/HospitalManagementSystem.API"
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish "HospitalManagementSystem.API/HospitalManagementSystem.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
