@@ -1,5 +1,4 @@
 using System.Text;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 using HospitalManagementSystem.API.Data;
 using HospitalManagementSystem.API.Mappings;
 using HospitalManagementSystem.API.Repositories;
@@ -107,7 +106,10 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
-    db.Database.Migrate();
+    if (app.Environment.IsProduction())
+        db.Database.EnsureCreated();
+    else
+        db.Database.Migrate();
 }
 
 // ── Middleware Pipeline ───────────────────────────────────────────────────────
