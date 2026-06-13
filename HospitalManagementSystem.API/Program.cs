@@ -102,8 +102,16 @@ var app = builder.Build();
 // ── Apply Migrations automatically on startup ─────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
-    db.Database.Migrate();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Database migration failed on startup.");
+    }
 }
 
 // ── Middleware Pipeline ───────────────────────────────────────────────────────
