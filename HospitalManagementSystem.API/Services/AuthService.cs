@@ -12,21 +12,50 @@ namespace HospitalManagementSystem.API.Services
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IPatientRepository _patientRepository;
+        private readonly IDoctorRepository _doctorRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IUserRepository userRepository, IPatientRepository patientRepository,
+            IDoctorRepository doctorRepository, IConfiguration configuration)
         {
             _userRepository = userRepository;
+            _patientRepository = patientRepository;
+            _doctorRepository = doctorRepository;
             _configuration = configuration;
         }
 
-        public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
+        public async Task<(AuthResponseDto? result, string? error)> LoginAsync(LoginDto dto)
         {
-            var user = await _userRepository.GetByUsernameAsync(dto.Username);
-            if (user == null) return null;
-            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) return null;
+            var user = await _userRepository.GetByUsernameAnyStatusAsync(dto.Username);
+            if (user == null) return (null, "Invalid username or password.");
+            if (!user.IsActive) return (null, "This account has been deactivated. Please contact the administrator.");
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) return (null, "Invalid username or password.");
 
-            return GenerateToken(user);
+            var response = GenerateToken(user);
+
+            if (user.Role == "Patient")
+            {
+                var patients = await _patientRepository.GetAllAsync();
+                var match = patients.FirstOrDefault(p =>
+                    p.LastName.Equals(user.Username, StringComparison.OrdinalIgnoreCase) ||
+                    p.FirstName.Equals(user.Username, StringComparison.OrdinalIgnoreCase) ||
+                    user.Username.Contains(p.LastName, StringComparison.OrdinalIgnoreCase) ||
+                    p.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase));
+                response.ProfileId = match?.Id;
+            }
+            else if (user.Role == "Doctor")
+            {
+                var doctors = await _doctorRepository.GetAllAsync();
+                var match = doctors.FirstOrDefault(d =>
+                    d.LastName.Equals(user.Username, StringComparison.OrdinalIgnoreCase) ||
+                    d.FirstName.Equals(user.Username, StringComparison.OrdinalIgnoreCase) ||
+                    user.Username.Contains(d.LastName, StringComparison.OrdinalIgnoreCase) ||
+                    d.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase));
+                response.ProfileId = match?.Id;
+            }
+
+            return (response, null);
         }
 
         public async Task<(AuthResponseDto? result, string? error)> RegisterAsync(RegisterDto dto)

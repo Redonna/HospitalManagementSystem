@@ -33,7 +33,7 @@ namespace HospitalManagementSystem.API.Services.Interfaces
 
     public interface IAuthService
     {
-        Task<AuthResponseDto?> LoginAsync(LoginDto dto);
+        Task<(AuthResponseDto? result, string? error)> LoginAsync(LoginDto dto);
         Task<(AuthResponseDto? result, string? error)> RegisterAsync(RegisterDto dto);
     }
 }

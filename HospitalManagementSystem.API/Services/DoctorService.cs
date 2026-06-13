@@ -9,11 +9,13 @@ namespace HospitalManagementSystem.API.Services
     public class DoctorService : IDoctorService
     {
         private readonly IDoctorRepository _repository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public DoctorService(IDoctorRepository repository, IMapper mapper)
+        public DoctorService(IDoctorRepository repository, IUserRepository userRepository, IMapper mapper)
         {
             _repository = repository;
+            _userRepository = userRepository;
             _mapper = mapper;
         }
 
@@ -52,6 +54,9 @@ namespace HospitalManagementSystem.API.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
+            var doctor = await _repository.GetByIdAsync(id);
+            if (doctor == null) return false;
+            await _userRepository.DeactivateByEmailAsync(doctor.Email);
             return await _repository.DeleteAsync(id);
         }
     }

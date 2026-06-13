@@ -22,10 +22,9 @@ namespace HospitalManagementSystem.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _authService.LoginAsync(dto);
-            return result == null
-                ? Unauthorized("Invalid username or password.")
-                : Ok(result);
+            var (result, error) = await _authService.LoginAsync(dto);
+            if (error != null) return Unauthorized(error);
+            return Ok(result);
         }
 
         /// <summary>Register a new user (Admin only)</summary>
