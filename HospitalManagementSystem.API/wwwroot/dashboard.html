@@ -435,7 +435,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  const API = 'https://localhost:56075/api';
+  const API = window.location.hostname === 'localhost' ? 'https://localhost:56075/api' : 'https://hospital-api-jj5q.onrender.com/api';
   const token = localStorage.getItem('token');
   const role  = localStorage.getItem('role');
   const username = localStorage.getItem('username');

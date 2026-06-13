@@ -89,7 +89,7 @@
   </div>
 
   <script>
-    const API = 'https://localhost:56075/api';
+    const API = window.location.hostname === 'localhost' ? 'https://localhost:56075/api' : 'https://hospital-api-jj5q.onrender.com/api';
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
