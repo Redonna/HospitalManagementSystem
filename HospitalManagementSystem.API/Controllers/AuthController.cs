@@ -29,7 +29,7 @@ namespace HospitalManagementSystem.API.Controllers
 
         /// <summary>Register a new user (Admin only)</summary>
         [HttpPost("register")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
