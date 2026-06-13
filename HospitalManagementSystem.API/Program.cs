@@ -110,12 +110,11 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
         if (app.Environment.IsProduction())
         {
-            db.Database.EnsureCreated();
-            db.Database.ExecuteSqlRaw(@"
-                INSERT INTO ""Users"" (""Username"", ""PasswordHash"", ""Role"", ""Email"", ""CreatedAt"", ""IsActive"")
-                SELECT 'admin', '$2a$11$V1JGVUqqi3SZOmGHbCPfteLFA0GY5cm6yfpnqq1.NRNrsM7kF8kN6', 'Admin', '', NOW(), true
-                WHERE NOT EXISTS (SELECT 1 FROM ""Users"" WHERE ""Username"" = 'admin');
-            ");
+            var created = db.Database.EnsureCreated();
+            var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            startupLogger.LogInformation("EnsureCreated result: {Created}", created);
+            var userCount = db.Users.Count();
+            startupLogger.LogInformation("User count after EnsureCreated: {Count}", userCount);
         }
         else
             db.Database.Migrate();
