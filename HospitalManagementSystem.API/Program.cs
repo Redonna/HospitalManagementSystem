@@ -14,10 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ──────────────────────────────────────────────────────────────────
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-if (builder.Environment.IsProduction())
-    builder.Services.AddDbContext<HospitalDbContext>(options => options.UseNpgsql(connectionString));
-else
-    builder.Services.AddDbContext<HospitalDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<HospitalDbContext>(options =>
+{
+    if (builder.Environment.IsProduction())
+        options.UseNpgsql(connectionString);
+    else
+        options.UseSqlServer(connectionString);
+});
 
 // ── AutoMapper ────────────────────────────────────────────────────────────────
 builder.Services.AddAutoMapper(typeof(MappingProfile));
