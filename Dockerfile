@@ -7,6 +7,7 @@ FROM mcr.microsoft.com/dotnet/nightly/sdk:10.0 AS build
 WORKDIR /src
 COPY . .
 RUN dotnet remove HospitalManagementSystem.API/HospitalManagementSystem.API.csproj package Microsoft.EntityFrameworkCore.SqlServer
+RUN rm -rf HospitalManagementSystem.API/Migrations
 RUN dotnet publish "HospitalManagementSystem.API/HospitalManagementSystem.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
