@@ -109,7 +109,19 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
         if (app.Environment.IsProduction())
+        {
             db.Database.EnsureCreated();
+            if (!db.Users.Any())
+            {
+                db.Users.Add(new HospitalManagementSystem.API.Models.User
+                {
+                    Username = "admin",
+                    PasswordHash = "$2a$11$V1JGVUqqi3SZOmGHbCPfteLFA0GY5cm6yfpnqq1.NRNrsM7kF8kN6",
+                    Role = "Admin"
+                });
+                db.SaveChanges();
+            }
+        }
         else
             db.Database.Migrate();
     }
