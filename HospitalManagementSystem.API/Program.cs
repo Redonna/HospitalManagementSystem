@@ -13,14 +13,8 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ──────────────────────────────────────────────────────────────────
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 builder.Services.AddDbContext<HospitalDbContext>(options =>
-{
-    if (builder.Environment.IsProduction())
-        options.UseNpgsql(connectionString);
-    else
-        options.UseSqlServer(connectionString);
-});
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ── AutoMapper ────────────────────────────────────────────────────────────────
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -108,25 +102,8 @@ var app = builder.Build();
 // ── Apply Migrations automatically on startup ─────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
-        if (app.Environment.IsProduction())
-        {
-            var created = db.Database.EnsureCreated();
-            var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-            startupLogger.LogInformation("EnsureCreated result: {Created}", created);
-            var userCount = db.Users.Count();
-            startupLogger.LogInformation("User count after EnsureCreated: {Count}", userCount);
-        }
-        else
-            db.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Database initialization failed.");
-    }
+    var db = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
+    db.Database.Migrate();
 }
 
 // ── Middleware Pipeline ───────────────────────────────────────────────────────
