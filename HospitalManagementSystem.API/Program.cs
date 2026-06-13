@@ -1,4 +1,5 @@
 using System.Text;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using HospitalManagementSystem.API.Data;
 using HospitalManagementSystem.API.Mappings;
 using HospitalManagementSystem.API.Repositories;
@@ -13,8 +14,11 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ──────────────────────────────────────────────────────────────────
-builder.Services.AddDbContext<HospitalDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+if (builder.Environment.IsProduction())
+    builder.Services.AddDbContext<HospitalDbContext>(options => options.UseNpgsql(connectionString));
+else
+    builder.Services.AddDbContext<HospitalDbContext>(options => options.UseSqlServer(connectionString));
 
 // ── AutoMapper ────────────────────────────────────────────────────────────────
 builder.Services.AddAutoMapper(typeof(MappingProfile));
