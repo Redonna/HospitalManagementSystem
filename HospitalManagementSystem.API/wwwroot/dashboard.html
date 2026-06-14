@@ -485,6 +485,16 @@
     if (role !== 'Patient') return;
     const stored = localStorage.getItem('profileId');
     if (stored) { myPatientId = parseInt(stored); return; }
+    const res = await api('/patients');
+    if (!res?.ok) return;
+    const patients = await res.json();
+    const match = patients.find(p =>
+      p.lastName.toLowerCase() === username.toLowerCase() ||
+      p.firstName.toLowerCase() === username.toLowerCase() ||
+      username.toLowerCase().includes(p.lastName.toLowerCase()) ||
+      username.toLowerCase().includes(p.firstName.toLowerCase())
+    );
+    if (match) { myPatientId = match.id; localStorage.setItem('profileId', match.id); }
   }
 
   function showPage(name, el) {
