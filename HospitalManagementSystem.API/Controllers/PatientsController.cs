@@ -17,6 +17,21 @@ namespace HospitalManagementSystem.API.Controllers
             _service = service;
         }
 
+        /// <summary>Get the patient profile for the currently authenticated patient user</summary>
+        [HttpGet("me")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetMe()
+        {
+            var username = User.Identity?.Name;
+            var patients = await _service.GetAllAsync();
+            var match = patients.FirstOrDefault(p =>
+                p.FirstName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
+                p.LastName.Equals(username, StringComparison.OrdinalIgnoreCase) ||
+                (username != null && username.Contains(p.LastName, StringComparison.OrdinalIgnoreCase)) ||
+                (username != null && username.Contains(p.FirstName, StringComparison.OrdinalIgnoreCase)));
+            return match == null ? NotFound("No patient profile found for the current user.") : Ok(match);
+        }
+
         /// <summary>Get all active patients</summary>
         [HttpGet]
         [Authorize(Roles = "Admin,Doctor")]
