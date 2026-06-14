@@ -21,5 +21,7 @@ namespace HospitalManagementSystem.API.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
+
+        public int? ProfileId { get; set; } // Links to Patient.Id or Doctor.Id
     }
 }

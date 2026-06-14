@@ -107,6 +107,7 @@ namespace HospitalManagementSystem.API.DTOs
         [Required] public string Password { get; set; } = string.Empty;
         [Required, MaxLength(50)] public string Role { get; set; } = string.Empty;
         [EmailAddress] public string Email { get; set; } = string.Empty;
+        public int? ProfileId { get; set; } // Optional: link to Patient.Id or Doctor.Id
     }
 
     public class LoginDto

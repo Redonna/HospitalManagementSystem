@@ -34,7 +34,11 @@ namespace HospitalManagementSystem.API.Services
 
             var response = GenerateToken(user);
 
-            if (user.Role == "Patient")
+            if (user.ProfileId.HasValue)
+            {
+                response.ProfileId = user.ProfileId;
+            }
+            else if (user.Role == "Patient")
             {
                 var patients = await _patientRepository.GetAllAsync();
                 var match = patients.FirstOrDefault(p =>
@@ -72,7 +76,8 @@ namespace HospitalManagementSystem.API.Services
                 Username = dto.Username,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Role = dto.Role,
-                Email = dto.Email
+                Email = dto.Email,
+                ProfileId = dto.ProfileId
             };
 
             var created = await _userRepository.CreateAsync(user);
